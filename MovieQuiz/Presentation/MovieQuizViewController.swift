@@ -25,6 +25,20 @@ enum movieQuizeFont: String {
 
 final class MovieQuizViewController: UIViewController {
     
+    // MARK: - IB Outlets
+    @IBOutlet private weak var questionTitleLabel: UILabel!
+    
+    @IBOutlet private weak var counterLabel: UILabel!
+    
+    @IBOutlet private weak var imageView: UIImageView!
+    
+    @IBOutlet private weak var textLabel: UILabel!
+        
+    @IBOutlet private weak var yesButton: UIButton!
+    
+    @IBOutlet private weak var noButton: UIButton!
+    
+    // MARK: - Private Properties
     private let questions: [QuizQuestion] = [
         QuizQuestion(image: "The Godfather", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
         QuizQuestion(image: "The Dark Knight", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: true),
@@ -42,18 +56,6 @@ final class MovieQuizViewController: UIViewController {
     
     private var correctAnswers = 0
     
-    @IBOutlet private weak var questionTitleLabel: UILabel!
-    
-    @IBOutlet private weak var counterLabel: UILabel!
-    
-    @IBOutlet private weak var imageView: UIImageView!
-    
-    @IBOutlet private weak var textLabel: UILabel!
-        
-    @IBOutlet private weak var yesButton: UIButton!
-    
-    @IBOutlet private weak var noButton: UIButton!
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,6 +72,22 @@ final class MovieQuizViewController: UIViewController {
         show(quiz: convert(model: questions[currentQuestionIndex]))
     }
     
+    // MARK: - IB Actions
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        let currentQuestion = questions[currentQuestionIndex]
+        let giveAnswer = false
+        
+        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+    }
+    
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        let currentQuestion = questions[currentQuestionIndex]
+        let giveAnswer = true
+        
+        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+    }
+    
+    // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStepViewModel = QuizStepViewModel(
             image: UIImage(named: model.image) ?? UIImage(),
@@ -88,17 +106,18 @@ final class MovieQuizViewController: UIViewController {
     
     private func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
+            stopClicking(click: false)
             settingFrameImage(for: imageView, with: .ypGreenIOS)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    self.showNextQuestionOrResults()
-            }
-            
+        
             correctAnswers += 1
         } else {
+            stopClicking(click: false)
             settingFrameImage(for: imageView, with: .ypRedIOS)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    self.showNextQuestionOrResults()
-            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.showNextQuestionOrResults()
+            self.stopClicking(click: true)
         }
     }
     
@@ -141,18 +160,9 @@ final class MovieQuizViewController: UIViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex]
-        let giveAnswer = false
-        
-        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
-    }
-    
-    @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        let currentQuestion = questions[currentQuestionIndex]
-        let giveAnswer = true
-        
-        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+    private func stopClicking(click: Bool) {
+        self.yesButton.isEnabled = click
+        self.noButton.isEnabled = click
     }
 }
 
