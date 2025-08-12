@@ -1,29 +1,30 @@
 import UIKit
 
-struct QuizQuestion {
-    let image: String
-    let text: String
-    let correctAnswer: Bool
-}
-
-struct QuizStepViewModel {
-    let image: UIImage
-    let text: String
-    let questionNumber: String
-}
-
-struct QuizResultsViewModel {
-  let title: String
-  let text: String
-  let buttonText: String
-}
-
-enum movieQuizeFont: String {
-    case medium = "YSDisplay-Medium"
-    case bold = "YSDisplay-Bold"
-}
-
 final class MovieQuizViewController: UIViewController {
+    
+    private struct QuizQuestion {
+        let image: String
+        let text: String
+        let correctAnswer: Bool
+    }
+
+    private struct QuizStepViewModel {
+        let image: UIImage
+        let text: String
+        let questionNumber: String
+    }
+
+    private struct QuizResultsViewModel {
+      let title: String
+      let text: String
+      let buttonText: String
+    }
+
+    private enum movieQuizeFont: String {
+        case medium = "YSDisplay-Medium"
+        case bold = "YSDisplay-Bold"
+    }
+
     
     // MARK: - IB Outlets
     @IBOutlet private weak var questionTitleLabel: UILabel!
@@ -166,16 +167,16 @@ final class MovieQuizViewController: UIViewController {
     }
 }
 
-extension MovieQuizViewController {
-    private func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
+private extension MovieQuizViewController {
+    func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
         label.font = UIFont(name: withFont, size: size)
     }
     
-    private func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
+    func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
         button.titleLabel?.font = UIFont(name: withFont, size: size)
     }
     
-    private func settingFrameImage(for imageView: UIImageView, with color: UIColor) {
+    func settingFrameImage(for imageView: UIImageView, with color: UIColor) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = color.cgColor
