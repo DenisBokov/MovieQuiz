@@ -94,9 +94,9 @@
 		AD1ABAB02831907B00B3E448 /* MovieQuiz */ = {
 			isa = PBXGroup;
 			children = (
-				EFE7D40F2E571FD100FD10F7 /* Services */,
 				AD1ABAB12831907B00B3E448 /* AppDelegate.swift */,
 				AD1ABAB32831907B00B3E448 /* SceneDelegate.swift */,
+				EFE7D40F2E571FD100FD10F7 /* Services */,
 				EFE7D4082E57193200FD10F7 /* Models */,
 				ADF0CF75283FDAA10075F54D /* Helpers */,
 				8F4738322848DE2A005DF65E /* Presentation */,

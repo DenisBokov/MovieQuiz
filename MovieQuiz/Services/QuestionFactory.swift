@@ -21,7 +21,7 @@ class QuestionFactory {
         QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false)
     ]
     
-    func reqquestNextQuestion() -> QuizQuestion? {
+    func requestNextQuestion() -> QuizQuestion? {
         guard let index = (0..<questions.count).randomElement() else { return nil }
         
         return questions[safe: index]
