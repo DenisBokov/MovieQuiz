@@ -73,7 +73,7 @@ final class StatisticService: StatisticServiceProtocol {
         correctAnswers += count
         gamesCount += 1
         
-        let bestGameReult = GameResult(correct: correctAnswers, total: totalQuestionsAsked, date: Date())
+        let bestGameReult = GameResult(correct: count, total: amount, date: Date())
         if bestGameReult.compareResults(gameRecord: bestGame) {
             bestGame = bestGameReult
         }
