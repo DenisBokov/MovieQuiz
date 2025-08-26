@@ -6,7 +6,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         case medium = "YSDisplay-Medium"
         case bold = "YSDisplay-Bold"
     }
-    
+
     // MARK: - IB Outlets
     @IBOutlet private weak var questionTitleLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
