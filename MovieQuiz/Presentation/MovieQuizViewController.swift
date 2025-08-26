@@ -10,8 +10,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - IB Outlets
     @IBOutlet private weak var questionTitleLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
-    @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var textLabel: UILabel!
+    
+    @IBOutlet private weak var imageView: UIImageView!
+     
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
     
@@ -22,6 +24,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenter = AlertPresenter()
+    private var statisticService: StatisticServiceProtocol?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -41,18 +44,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         self.questionFactory = questionFactory
         
         questionFactory.requestNextQuestion()
-    }
-    
-    // MARK: - QuestionFactoryDelegate
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else { return }
         
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
+        statisticService = StatisticService()
     }
     
     // MARK: - IB Actions
@@ -68,6 +61,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let giveAnswer = true
         
         showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else { return }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
+        }
     }
     
     // MARK: - Private Methods
@@ -106,9 +111,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
+            statisticService?.store(correct: correctAnswers, total: questionsAmount)
+            
             let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен!",
-                text: "Ваш результат: \(correctAnswers)/\(questionsAmount)",
+                text: showMessageInAlert(),
                 buttonText: "Сыграть еще раз"
             )
             
@@ -138,20 +145,36 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 }
 
-extension MovieQuizViewController {
-    private func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
+private extension MovieQuizViewController {
+    func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
         label.font = UIFont(name: withFont, size: size)
     }
     
-    private func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
+    func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
         button.titleLabel?.font = UIFont(name: withFont, size: size)
     }
     
-    private func settingFrameImage(for imageView: UIImageView, with color: UIColor) {
+    func settingFrameImage(for imageView: UIImageView, with color: UIColor) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = color.cgColor
         imageView.layer.cornerRadius = 20
+    }
+    
+    func showMessageInAlert() -> String {
+        guard let statisticService = statisticService else { return ""}
+        
+        let yuorResultMessage: String = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
+        let gamesCountMessage: String = "Коллличество сыгранных квизов: \(statisticService.gamesCount)"
+        let recordMessage: String = "Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))"
+        let totalAccuracyMessage: String = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+        
+        let resultMessage: String = [yuorResultMessage,
+                                     gamesCountMessage,
+                                     recordMessage,
+                                     totalAccuracyMessage].joined(separator: "\n")
+        
+        return resultMessage
     }
 }
 
