@@ -52,14 +52,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else { return }
+        guard let currentQuestion else { return }
         let giveAnswer = false
         
         showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else { return }
+        guard let currentQuestion else { return }
         let giveAnswer = true
         
         showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
@@ -166,12 +166,12 @@ private extension MovieQuizViewController {
     func showMessageInAlert() -> String {
         guard let statisticService = statisticService else { return ""}
         
-        let yuorResultMessage: String = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
+        let yourResultMessage: String = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
         let gamesCountMessage: String = "Коллличество сыгранных квизов: \(statisticService.gamesCount)"
         let recordMessage: String = "Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))"
         let totalAccuracyMessage: String = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
         
-        let resultMessage: String = [yuorResultMessage,
+        let resultMessage: String = [yourResultMessage,
                                      gamesCountMessage,
                                      recordMessage,
                                      totalAccuracyMessage].joined(separator: "\n")
