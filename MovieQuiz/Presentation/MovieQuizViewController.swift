@@ -19,6 +19,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
     
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
+    
     // MARK: - Private Properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -144,6 +146,23 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func stopClicking(click: Bool) {
         self.yesButton.isEnabled = click
         self.noButton.isEnabled = click
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating() 
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator() // скрываем индикатор загрузки
+        
+        // создайте и покажите алерт
+        alertPresenter.showAlertForError(viewController: self, message: message)
     }
 }
 

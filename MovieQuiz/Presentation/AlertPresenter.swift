@@ -18,4 +18,12 @@ final  class AlertPresenter {
         alert.addAction(action)
         viewController.present(alert, animated: true, completion: nil)
     }
+    
+    func showAlertForError(viewController: UIViewController, message: String) {
+        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Попробовать ещё раз", style: .default, handler: nil))
+
+        viewController.present(alert, animated: true, completion: nil)
+    }
 }
