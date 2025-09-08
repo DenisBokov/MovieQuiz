@@ -2,8 +2,7 @@ import UIKit
 
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-
-    
+   
     private enum movieQuizeFont: String {
         case medium = "YSDisplay-Medium"
         case bold = "YSDisplay-Bold"
@@ -79,10 +78,23 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
+        let movieURLString: MostPopularMovie
+        let imageData = try? Data(contentsOf: movieURLString.imageURL)
+        let image = UIImage(data: imageData ?? Data())
+        
         let questionStepViewModel = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: image ?? UIImage(),
             text: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
         )
