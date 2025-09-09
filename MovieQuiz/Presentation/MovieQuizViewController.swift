@@ -33,7 +33,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        textLabel.isHidden = true
+        hideScreeElements(yesOrNo: true)
         
         settingFontLabel(for: counterLabel, withFont: movieQuizeFont.medium.rawValue, size: 20)
         settingFontLabel(for: questionTitleLabel, withFont: movieQuizeFont.medium.rawValue, size: 20)
@@ -80,7 +80,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let viewModel = convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
-            self?.textLabel.isHidden = false
+            self?.hideScreeElements(yesOrNo: false)
             self?.show(quiz: viewModel)
         }
     }
@@ -92,7 +92,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     func didFailToLoadData(with error: any Error) {
         imageView.image = UIImage(named: "The Godfather")
-        textLabel.isHidden = false
+        hideScreeElements(yesOrNo: false)
         showNetworkError(message: "Невозможно загрузить данные")
     }
     
@@ -141,7 +141,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             )
             
             show(quiz: viewModel)
-            imageView.layer.borderColor = UIColor.clear.cgColor
         } else {
             currentQuestionIndex += 1
             
@@ -154,6 +153,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let model = AlertModel(titele: result.title, message: result.text, buttonTitle: result.buttonText) { [weak self] in
             self?.currentQuestionIndex = 0
             self?.correctAnswers = 0
+            self?.imageView.layer.borderColor = UIColor.clear.cgColor
             self?.questionFactory?.requestNextQuestion()
         }
         
@@ -212,6 +212,12 @@ private extension MovieQuizViewController {
                                      totalAccuracyMessage].joined(separator: "\n")
         
         return resultMessage
+    }
+    
+    func hideScreeElements(yesOrNo: Bool) {
+        questionTitleLabel.isHidden = yesOrNo
+        counterLabel.isHidden = yesOrNo
+        textLabel.isHidden = yesOrNo
     }
 }
 
