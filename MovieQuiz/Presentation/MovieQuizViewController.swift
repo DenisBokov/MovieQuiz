@@ -33,6 +33,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        textLabel.isHidden = true
+        
         settingFontLabel(for: counterLabel, withFont: movieQuizeFont.medium.rawValue, size: 20)
         settingFontLabel(for: questionTitleLabel, withFont: movieQuizeFont.medium.rawValue, size: 20)
         settingFontLabel(for: textLabel, withFont: movieQuizeFont.bold.rawValue, size: 23)
@@ -42,13 +44,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.cornerRadius = 20
         
-        let questionFactory = QuestionFactory()
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
         
+        statisticService = StatisticService()
+        
+        showLoadingIndicator()
+        questionFactory.loadData()
+        
         questionFactory.requestNextQuestion()
         
-        statisticService = StatisticService()
     }
     
     // MARK: - IB Actions
@@ -74,6 +80,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let viewModel = convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
+            self?.textLabel.isHidden = false
             self?.show(quiz: viewModel)
         }
     }
@@ -84,17 +91,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     func didFailToLoadData(with error: any Error) {
-        showNetworkError(message: error.localizedDescription)
+        imageView.image = UIImage(named: "The Godfather")
+        textLabel.isHidden = false
+        showNetworkError(message: "Невозможно загрузить данные")
     }
     
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let movieURLString: MostPopularMovie
-        let imageData = try? Data(contentsOf: movieURLString.imageURL)
-        let image = UIImage(data: imageData ?? Data())
-        
         let questionStepViewModel = QuizStepViewModel(
-            image: image ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             text: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
         )
@@ -161,8 +166,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showLoadingIndicator() {
-        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
-        activityIndicator.startAnimating() // включаем анимацию
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
     }
     
     private func hideLoadingIndicator() {
@@ -171,9 +176,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showNetworkError(message: String) {
-        hideLoadingIndicator() // скрываем индикатор загрузки
-        
-        // создайте и покажите алерт
+        hideLoadingIndicator()
+    
         alertPresenter.showAlertForError(viewController: self, message: message)
     }
 }

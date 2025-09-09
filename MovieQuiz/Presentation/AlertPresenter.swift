@@ -20,7 +20,7 @@ final  class AlertPresenter {
     }
     
     func showAlertForError(viewController: UIViewController, message: String) {
-        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(title: "Что-то пошло не так(", message: message, preferredStyle: .alert)
 
         alert.addAction(UIAlertAction(title: "Попробовать ещё раз", style: .default, handler: nil))
 
