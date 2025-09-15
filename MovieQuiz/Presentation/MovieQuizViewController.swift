@@ -2,8 +2,7 @@ import UIKit
 
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-
-    
+   
     private enum movieQuizeFont: String {
         case medium = "YSDisplay-Medium"
         case bold = "YSDisplay-Bold"
@@ -19,6 +18,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
     
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
+    
     // MARK: - Private Properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -32,6 +33,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        hideScreeElements(yesOrNo: true)
+        
         settingFontLabel(for: counterLabel, withFont: movieQuizeFont.medium.rawValue, size: 20)
         settingFontLabel(for: questionTitleLabel, withFont: movieQuizeFont.medium.rawValue, size: 20)
         settingFontLabel(for: textLabel, withFont: movieQuizeFont.bold.rawValue, size: 23)
@@ -41,13 +44,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.cornerRadius = 20
         
-        let questionFactory = QuestionFactory()
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
         
+        statisticService = StatisticService()
+        
+        showLoadingIndicator()
+        questionFactory.loadData()
+        
         questionFactory.requestNextQuestion()
         
-        statisticService = StatisticService()
     }
     
     // MARK: - IB Actions
@@ -73,14 +80,26 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let viewModel = convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
+            self?.hideScreeElements(yesOrNo: false)
             self?.show(quiz: viewModel)
         }
+    }
+    
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        imageView.image = UIImage(named: "The Godfather")
+        hideScreeElements(yesOrNo: false)
+        showNetworkError(message: "Невозможно загрузить данные")
     }
     
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStepViewModel = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             text: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
         )
@@ -122,7 +141,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             )
             
             show(quiz: viewModel)
-            imageView.layer.borderColor = UIColor.clear.cgColor
         } else {
             currentQuestionIndex += 1
             
@@ -135,6 +153,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let model = AlertModel(titele: result.title, message: result.text, buttonTitle: result.buttonText) { [weak self] in
             self?.currentQuestionIndex = 0
             self?.correctAnswers = 0
+            self?.imageView.layer.borderColor = UIColor.clear.cgColor
             self?.questionFactory?.requestNextQuestion()
         }
         
@@ -144,6 +163,22 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func stopClicking(click: Bool) {
         self.yesButton.isEnabled = click
         self.noButton.isEnabled = click
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating() 
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+    
+        alertPresenter.showAlertForError(viewController: self, message: message)
     }
 }
 
@@ -177,6 +212,12 @@ private extension MovieQuizViewController {
                                      totalAccuracyMessage].joined(separator: "\n")
         
         return resultMessage
+    }
+    
+    func hideScreeElements(yesOrNo: Bool) {
+        questionTitleLabel.isHidden = yesOrNo
+        counterLabel.isHidden = yesOrNo
+        textLabel.isHidden = yesOrNo
     }
 }
 

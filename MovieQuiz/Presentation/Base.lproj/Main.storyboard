@@ -39,12 +39,12 @@
                                     </stackView>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fHS-sr-nLW" userLabel="Preview Image">
                                         <rect key="frame" x="0.0" y="44" width="374" height="561"/>
-                                        <color key="backgroundColor" name="YP White (iOS)"/>
+                                        <color key="backgroundColor" name="YP Black (iOS)"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="fHS-sr-nLW" secondAttribute="height" multiplier="2:3" id="Cvi-Rd-Bja"/>
                                         </constraints>
                                     </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Рейтинг этого фильма меньше, чем пять?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UGe-NV-FV2" userLabel="Question Label">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Рейтинг этого фильма меньше, чем 9?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UGe-NV-FV2" userLabel="Question Label">
                                         <rect key="frame" x="0.0" y="625" width="374" height="17"/>
                                         <fontDescription key="fontDescription" name="HelveticaNeue-Medium" family="Helvetica Neue" pointSize="20"/>
                                         <color key="textColor" name="YP White (iOS)"/>
@@ -99,18 +99,25 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="gfH-sk-lch">
+                                <rect key="frame" x="188.5" y="429.5" width="37" height="37"/>
+                                <color key="color" name="YP White (iOS)"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black (iOS)"/>
                         <color key="tintColor" name="YP Background (iOS)"/>
                         <constraints>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="FvG-9w-byB" secondAttribute="bottom" id="7RI-mP-1n4"/>
+                            <constraint firstItem="gfH-sk-lch" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="IE9-on-enZ"/>
                             <constraint firstItem="FvG-9w-byB" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="noi-md-crn"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="FvG-9w-byB" secondAttribute="trailing" constant="20" id="pOj-iT-kpC"/>
+                            <constraint firstItem="gfH-sk-lch" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="x25-Fn-FkL"/>
                             <constraint firstItem="FvG-9w-byB" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="zWO-4Q-Wsk"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="gfH-sk-lch" id="JPn-kX-gHp"/>
                         <outlet property="counterLabel" destination="nFr-nY-bY8" id="C6H-qb-3U2"/>
                         <outlet property="imageView" destination="fHS-sr-nLW" id="jfs-T9-rRu"/>
                         <outlet property="noButton" destination="wa5-Cn-tJk" id="DbH-fi-xcU"/>
@@ -121,7 +128,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="577" y="19"/>
+            <point key="canvasLocation" x="316" y="42"/>
         </scene>
     </scenes>
     <resources>
