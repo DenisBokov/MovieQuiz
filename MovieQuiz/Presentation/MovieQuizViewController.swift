@@ -43,6 +43,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.cornerRadius = 20
         
+        presenter.viewController = self
+        
         let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory.setup(delegate: self)
         self.questionFactory = questionFactory
@@ -58,17 +60,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else { return }
-        let giveAnswer = false
-        
-        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else { return }
-        let giveAnswer = true
-        
-        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -102,7 +100,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         textLabel.text = step.text
     }
     
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
             stopClicking(click: false)
             settingFrameImage(for: imageView, with: .ypGreenIOS)
