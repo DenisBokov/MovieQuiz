@@ -45,13 +45,9 @@ class MoviesLoaderTests: XCTestCase {
             // Then
             switch movies {
             case .success(let movies):
-                // сравниваем данные с тем, что мы предполагали
-                // давайте проверим, что пришло, например, два фильма — ведь в тестовых данных их всего два
                 XCTAssertEqual(movies.items.count, 5)
-//                XCTAssertNotNil(error)
                 expectation.fulfill()
             case .failure(_):
-                // мы не ожидаем, что пришла ошибка; если она появится, надо будет провалить тест
                 XCTFail("Unexpected failure") // эта функция проваливает тест
             }
         }

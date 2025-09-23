@@ -1,7 +1,22 @@
 import UIKit
 
+protocol MovieQuizViewControllerProtocol: AnyObject {
+    func show(quiz step: QuizStepViewModel)
+    func show(quiz result: QuizResultsViewModel)
+    
+    func highlightImageBorder(isCorrectAnswer: Bool)
+    
+    func showLoadingIndicator()
+    func hideLoadingIndicator()
+    
+    func showNetworkError(message: String)
+    
+    func hideScreeElements(yesOrNo: Bool)
+    
+    func stopClicking(click: Bool)
+}
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
    
     private enum movieQuizeFont: String {
         case medium = "YSDisplay-Medium"
@@ -56,6 +71,7 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Methods
     func show(quiz step: QuizStepViewModel) {
+        imageView.layer.borderColor = UIColor.clear.cgColor
         imageView.image = step.image
         counterLabel.text = step.questionNumber
         textLabel.text = step.text
@@ -87,21 +103,14 @@ final class MovieQuizViewController: UIViewController {
     
     func showNetworkError(message: String) {
         hideLoadingIndicator()
+        imageView.image = UIImage(named: "The Godfather")
         
         alertPresenter.showAlertForError(viewController: self, message: message, restartGame: { [weak self] in
-            self?.presenter.restartGame()
+            guard let self else { return }
+            self.showLoadingIndicator()
+            self.presenter.restartGame()
         })
         
-    }
-}
-
-extension MovieQuizViewController {
-    private func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
-        label.font = UIFont(name: withFont, size: size)
-    }
-    
-    private func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
-        button.titleLabel?.font = UIFont(name: withFont, size: size)
     }
     
     func highlightImageBorder(isCorrectAnswer: Bool) {
@@ -114,6 +123,16 @@ extension MovieQuizViewController {
         questionTitleLabel.isHidden = yesOrNo
         counterLabel.isHidden = yesOrNo
         textLabel.isHidden = yesOrNo
+    }
+}
+
+extension MovieQuizViewController {
+    private func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
+        label.font = UIFont(name: withFont, size: size)
+    }
+    
+    private func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
+        button.titleLabel?.font = UIFont(name: withFont, size: size)
     }
 }
 

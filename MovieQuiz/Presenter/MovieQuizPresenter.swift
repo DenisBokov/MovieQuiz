@@ -7,18 +7,19 @@
 
 import UIKit
 
+
 final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     private let questionsAmount: Int = 10
     private var currentQuestion: QuizQuestion?
     private var correctAnswers: Int = 0
     private var questionFactory: QuestionFactoryProtocol?
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     private var statisticService: StatisticServiceProtocol?
     
     private var currentQuestionIndex: Int = 0
     
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         statisticService = StatisticService()
@@ -77,7 +78,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     func didFailToLoadData(with error: any Error) {
-        viewController?.imageView.image = UIImage(named: "The Godfather")
         viewController?.hideScreeElements(yesOrNo: false)
         viewController?.showNetworkError(message: "Невозможно загрузить данные")
     }
@@ -109,7 +109,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             self.switchToNextQuestion()
             
             questionFactory?.requestNextQuestion()
-            viewController?.imageView.layer.borderColor = UIColor.clear.cgColor
         }
     }
     
