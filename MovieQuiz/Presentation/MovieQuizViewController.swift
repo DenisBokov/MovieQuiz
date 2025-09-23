@@ -22,7 +22,6 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Private Properties
     private var alertPresenter: AlertPresenter = AlertPresenter()
-    var statisticService: StatisticServiceProtocol?
     private var presenter: MovieQuizPresenter!
     
     // MARK: - Lifecycle
@@ -42,8 +41,6 @@ final class MovieQuizViewController: UIViewController {
         
         presenter = MovieQuizPresenter(viewController: self)
         
-        statisticService = StatisticService()
-        
         showLoadingIndicator()
         
     }
@@ -57,29 +54,11 @@ final class MovieQuizViewController: UIViewController {
         presenter.yesButtonClicked()
     }
     
-    // MARK: - Private Methods
+    // MARK: - Methods
     func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         counterLabel.text = step.questionNumber
         textLabel.text = step.text
-    }
-    
-    func showAnswerResult(isCorrect: Bool) {
-        if isCorrect {
-            stopClicking(click: false)
-            settingFrameImage(for: imageView, with: .ypGreenIOS)
-        
-            presenter.correctAnswers += 1
-        } else {
-            stopClicking(click: false)
-            settingFrameImage(for: imageView, with: .ypRedIOS)
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self else { return }
-            self.presenter.showNextQuestionOrResults()
-            self.stopClicking(click: true)
-        }
     }
     
     func show(quiz result: QuizResultsViewModel) {
@@ -91,7 +70,7 @@ final class MovieQuizViewController: UIViewController {
         alertPresenter.showAlert(viewController: self, model: model)
     }
     
-    private func stopClicking(click: Bool) {
+    func stopClicking(click: Bool) {
         self.yesButton.isEnabled = click
         self.noButton.isEnabled = click
     }
@@ -117,35 +96,18 @@ final class MovieQuizViewController: UIViewController {
 }
 
 extension MovieQuizViewController {
-    func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
+    private func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
         label.font = UIFont(name: withFont, size: size)
     }
     
-    func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
+    private func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
         button.titleLabel?.font = UIFont(name: withFont, size: size)
     }
     
-    func settingFrameImage(for imageView: UIImageView, with color: UIColor) {
+    func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = color.cgColor
-        imageView.layer.cornerRadius = 20
-    }
-    
-    func showMessageInAlert() -> String {
-        guard let statisticService = statisticService else { return ""}
-        
-        let yourResultMessage: String = "Ваш результат: \(presenter.correctAnswers)/\(presenter.questionsAmount)"
-        let gamesCountMessage: String = "Коллличество сыгранных квизов: \(statisticService.gamesCount)"
-        let recordMessage: String = "Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))"
-        let totalAccuracyMessage: String = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
-        
-        let resultMessage: String = [yourResultMessage,
-                                     gamesCountMessage,
-                                     recordMessage,
-                                     totalAccuracyMessage].joined(separator: "\n")
-        
-        return resultMessage
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
     }
     
     func hideScreeElements(yesOrNo: Bool) {
