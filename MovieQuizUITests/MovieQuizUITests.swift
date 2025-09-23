@@ -9,7 +9,6 @@ import XCTest
 @testable import MovieQuiz
 
 class MovieQuizUITests: XCTestCase {
-    // swiftlint:disable:next implicitly_unwrapped_optional
     var app: XCUIApplication!
 
     override func setUpWithError() throws {
@@ -17,8 +16,7 @@ class MovieQuizUITests: XCTestCase {
         
         app = XCUIApplication()
         app.launch()
-        // это специальная настройка для тестов: если один тест не прошёл,
-        // то следующие тесты запускаться не будут; и правда, зачем ждать?
+    
         continueAfterFailure = false
     }
 
@@ -28,28 +26,21 @@ class MovieQuizUITests: XCTestCase {
         app.terminate()
         app = nil
     }
-
-    @MainActor
-    func testExample() throws {
-        let app = XCUIApplication()
-        app.launch()
-    }
     
     func testYesButton() {
         sleep(3)
-        let firstPoster = app.images["Poster"] // находим первоначальный постер
+        let firstPoster = app.images["Poster"]
         let firstPosterData = firstPoster.screenshot().pngRepresentation
         XCTAssertTrue(firstPoster.exists)
         
-        app.buttons["Yes"].tap() // находим кнопку `Да` и нажимаем её
+        app.buttons["Yes"].tap()
         
         sleep(3)
-        let secondPoster = app.images["Poster"] // ещё раз находим постер
+        let secondPoster = app.images["Poster"]
         let secondPosterData = secondPoster.screenshot().pngRepresentation
         XCTAssertTrue(secondPoster.exists)
         
-        XCTAssertFalse(firstPosterData == secondPosterData) // проверяем, что постеры разные
-//        XCTAssertNotEqual(firstPosterData, secondPosterData) // второй вариант проверки
+        XCTAssertFalse(firstPosterData == secondPosterData)
     }
     
     func testNoButton() {
@@ -61,7 +52,7 @@ class MovieQuizUITests: XCTestCase {
         app.buttons["No"].tap()
         
         sleep(3)
-        let secondPoster = app.images["Poster"] // ещё раз находим постер
+        let secondPoster = app.images["Poster"]
         let secondPosterData = secondPoster.screenshot().pngRepresentation
         XCTAssertTrue(secondPoster.exists)
         

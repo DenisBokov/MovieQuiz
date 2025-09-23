@@ -8,7 +8,6 @@
 import Foundation
 
 final class StatisticService: StatisticServiceProtocol {
-    // Кол-во игр
     var gamesCount: Int {
         get {
             storage.integer(forKey: Keys.gamesCount.rawValue)
@@ -43,7 +42,6 @@ final class StatisticService: StatisticServiceProtocol {
     
     private let storage: UserDefaults = .standard
     
-    // Правильные ответы
     private var correctAnswers: Int {
         get {
             storage.integer(forKey: Keys.correctAnswers.rawValue)
@@ -53,12 +51,10 @@ final class StatisticService: StatisticServiceProtocol {
         }
     }
     
-    // Общее кол-во заданных вопросов
     private var totalQuestionsAsked: Int {
         gamesCount * 10
     }
     
-    // Общее кол-во правильных ответов за все игры
     private var totalCorrectAnswers: Int {
         get {
             UserDefaults.standard.integer(forKey: Keys.totalCorrectAnswers.rawValue)
@@ -81,11 +77,11 @@ final class StatisticService: StatisticServiceProtocol {
     
     private enum Keys: String {
         case correctAnswers = "correctAnswers"
-        case gamesCount = "gameCount"         // Для счётчика сыгранных игр
-        case bestGameCorrect = "bestCorrectGame"    // Для количества правильных ответов в лучшей игре
-        case bestGameTotal = "bestTotalGame"       // Для общего количества вопросов в лучшей игре
-        case bestGameDate = "bestDateGame"        // Для даты лучшей игры
-        case totalCorrectAnswers = "totalCorrectAnswers"  // Для общего количества правильных ответов за все игры
-        case totalQuestionsAsked = "totalQuestionsAsked" // Для общего количества вопросов, заданных за все игры
+        case gamesCount = "gameCount"
+        case bestGameCorrect = "bestCorrectGame"
+        case bestGameTotal = "bestTotalGame"
+        case bestGameDate = "bestDateGame"
+        case totalCorrectAnswers = "totalCorrectAnswers"
+        case totalQuestionsAsked = "totalQuestionsAsked" 
     }
 }

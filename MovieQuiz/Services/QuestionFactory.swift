@@ -8,26 +8,29 @@
 import Foundation
 
 final class QuestionFactory: QuestionFactoryProtocol {
-
+    
+    // MARK: - Private Properties
     private let moviesLoader: MoviesLoading
     private weak var delegate: QuestionFactoryDelegate?
     private var movies: [MostPopularMovie] = []
     
+    // MARK: - Initializers
     init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate? = nil) {
         self.moviesLoader = moviesLoader
         self.delegate = delegate
     }
     
+    // MARK: - Public Methods
     func loadData() {
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
                 switch result {
                     case .success(let mostPopularMovies):
-                    self.movies = mostPopularMovies.items // сохраняем фильм в нашу новую переменную
-                        self.delegate?.didLoadDataFromServer() // сообщаем, что данные загрузились
+                    self.movies = mostPopularMovies.items
+                        self.delegate?.didLoadDataFromServer()
                     case .failure(let error):
-                        self.delegate?.didFailToLoadData(with: error) // сообщаем об ошибке нашему MovieQuizViewController
+                        self.delegate?.didFailToLoadData(with: error)
                 }
             }
         }
@@ -54,9 +57,16 @@ final class QuestionFactory: QuestionFactoryProtocol {
             }
             
             let rating = Float(movie.rating) ?? 0
+            let randomWord = ["больше", "меньше"].randomElement()
             let randomNumber = Int.random(in: 1...10)
-            let text = "Рейтинг этого фильма больше чем \(randomNumber)?"
-            let correctAnswer = rating > Float(randomNumber)
+            let text = "Рейтинг этого фильма \(randomWord ?? "больше") чем \(randomNumber)?"
+            var correctAnswer: Bool = false
+            
+            if randomWord == "больше" {
+                 correctAnswer = rating > Float(randomNumber)
+            } else {
+                correctAnswer = rating < Float(randomNumber)
+            }
             
             let question = QuizQuestion(image: imageData,
                                          text: text,
