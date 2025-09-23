@@ -7,15 +7,23 @@
 
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     let questionsAmount: Int = 10
     var currentQuestion: QuizQuestion?
     var correctAnswers: Int = 0
-    var questionFactory: QuestionFactoryProtocol?
+    private var questionFactory: QuestionFactoryProtocol?
     weak var viewController: MovieQuizViewController?
     
     private var currentQuestionIndex: Int = 0
+    
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
     
     func yesButtonClicked() {
         didAnswer(isYes: true)
@@ -37,6 +45,12 @@ final class MovieQuizPresenter {
         currentQuestionIndex += 1
     }
     
+    func restartGame() {
+        currentQuestionIndex = 0
+        correctAnswers = 0
+        questionFactory?.requestNextQuestion()
+    }
+    
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStepViewModel = QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
@@ -45,6 +59,18 @@ final class MovieQuizPresenter {
         )
         
         return questionStepViewModel
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        viewController?.imageView.image = UIImage(named: "The Godfather")
+        viewController?.hideScreeElements(yesOrNo: false)
+        viewController?.showNetworkError(message: "Невозможно загрузить данные")
     }
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
