@@ -8,11 +8,8 @@
 import Foundation
 
 struct GameResult {
-    // Кол - во правильных ответов
     let correct: Int
-    // Кол - во вопросов квиза
     let total: Int
-    // Дату завершения раунда
     let date: Date
     
     func compareResults(gameRecord: GameResult) -> Bool {

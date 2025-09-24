@@ -1,7 +1,22 @@
 import UIKit
 
+protocol MovieQuizViewControllerProtocol: AnyObject {
+    func show(quiz step: QuizStepViewModel)
+    func show(quiz result: QuizResultsViewModel)
+    
+    func highlightImageBorder(isCorrectAnswer: Bool)
+    
+    func showLoadingIndicator()
+    func hideLoadingIndicator()
+    
+    func showNetworkError(message: String)
+    
+    func hideScreeElements(yesOrNo: Bool)
+    
+    func stopClicking(click: Bool)
+}
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
    
     private enum movieQuizeFont: String {
         case medium = "YSDisplay-Medium"
@@ -21,13 +36,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Private Properties
-    private var currentQuestionIndex = 0
-    private var correctAnswers = 0
-    private let questionsAmount = 10
-    private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenter = AlertPresenter()
-    private var statisticService: StatisticServiceProtocol?
+    private var presenter: MovieQuizPresenter?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -44,174 +54,70 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.cornerRadius = 20
         
-        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        questionFactory.setup(delegate: self)
-        self.questionFactory = questionFactory
-        
-        statisticService = StatisticService()
+        presenter = MovieQuizPresenter(viewController: self)
         
         showLoadingIndicator()
-        questionFactory.loadData()
-        
-        questionFactory.requestNextQuestion()
         
     }
     
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else { return }
-        let giveAnswer = false
-        
-        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+        presenter?.noButtonClicked()
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion else { return }
-        let giveAnswer = true
-        
-        showAnswerResult(isCorrect: giveAnswer == currentQuestion.correctAnswer)
+        presenter?.yesButtonClicked()
     }
     
-    // MARK: - QuestionFactoryDelegate
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else { return }
-        
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.hideScreeElements(yesOrNo: false)
-            self?.show(quiz: viewModel)
-        }
-    }
-    
-    func didLoadDataFromServer() {
-        activityIndicator.isHidden = true
-        questionFactory?.requestNextQuestion()
-    }
-    
-    func didFailToLoadData(with error: any Error) {
-        imageView.image = UIImage(named: "The Godfather")
-        hideScreeElements(yesOrNo: false)
-        showNetworkError(message: "Невозможно загрузить данные")
-    }
-    
-    // MARK: - Private Methods
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStepViewModel = QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-            text: model.text,
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"
-        )
-        
-        return questionStepViewModel
-    }
-    
-    private func show(quiz step: QuizStepViewModel) {
+    // MARK: - Methods
+    func show(quiz step: QuizStepViewModel) {
+        imageView.layer.borderColor = UIColor.clear.cgColor
         imageView.image = step.image
         counterLabel.text = step.questionNumber
         textLabel.text = step.text
     }
     
-    private func showAnswerResult(isCorrect: Bool) {
-        if isCorrect {
-            stopClicking(click: false)
-            settingFrameImage(for: imageView, with: .ypGreenIOS)
-        
-            correctAnswers += 1
-        } else {
-            stopClicking(click: false)
-            settingFrameImage(for: imageView, with: .ypRedIOS)
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.showNextQuestionOrResults()
-            self.stopClicking(click: true)
-        }
-    }
-    
-    private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsAmount - 1 {
-            statisticService?.store(correct: correctAnswers, total: questionsAmount)
-            
-            let viewModel = QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                text: showMessageInAlert(),
-                buttonText: "Сыграть еще раз"
-            )
-            
-            show(quiz: viewModel)
-        } else {
-            currentQuestionIndex += 1
-            
-            questionFactory?.requestNextQuestion()
-            imageView.layer.borderColor = UIColor.clear.cgColor
-        }
-    }
-    
-    private func show(quiz result: QuizResultsViewModel) {
+    func show(quiz result: QuizResultsViewModel) {
         let model = AlertModel(titele: result.title, message: result.text, buttonTitle: result.buttonText) { [weak self] in
-            self?.currentQuestionIndex = 0
-            self?.correctAnswers = 0
-            self?.imageView.layer.borderColor = UIColor.clear.cgColor
-            self?.questionFactory?.requestNextQuestion()
+            guard let self else { return }
+            self.presenter?.restartGame()
+            self.imageView.layer.borderColor = UIColor.clear.cgColor
         }
         
         alertPresenter.showAlert(viewController: self, model: model)
     }
     
-    private func stopClicking(click: Bool) {
+    func stopClicking(click: Bool) {
         self.yesButton.isEnabled = click
         self.noButton.isEnabled = click
     }
     
-    private func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
-    private func hideLoadingIndicator() {
+    func hideLoadingIndicator() {
         activityIndicator.isHidden = true
         activityIndicator.stopAnimating() 
     }
     
-    private func showNetworkError(message: String) {
+    func showNetworkError(message: String) {
         hideLoadingIndicator()
-    
-        alertPresenter.showAlertForError(viewController: self, message: message)
-    }
-}
-
-private extension MovieQuizViewController {
-    func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
-        label.font = UIFont(name: withFont, size: size)
-    }
-    
-    func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
-        button.titleLabel?.font = UIFont(name: withFont, size: size)
+        imageView.image = UIImage(named: "The Godfather")
+        
+        alertPresenter.showAlertForError(viewController: self, message: message, restartGame: { [weak self] in
+            guard let self else { return }
+            self.showLoadingIndicator()
+            self.presenter?.restartGame()
+        })
+        
     }
     
-    func settingFrameImage(for imageView: UIImageView, with color: UIColor) {
+    func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = color.cgColor
-        imageView.layer.cornerRadius = 20
-    }
-    
-    func showMessageInAlert() -> String {
-        guard let statisticService = statisticService else { return ""}
-        
-        let yourResultMessage: String = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
-        let gamesCountMessage: String = "Коллличество сыгранных квизов: \(statisticService.gamesCount)"
-        let recordMessage: String = "Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(statisticService.bestGame.date.dateTimeString))"
-        let totalAccuracyMessage: String = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
-        
-        let resultMessage: String = [yourResultMessage,
-                                     gamesCountMessage,
-                                     recordMessage,
-                                     totalAccuracyMessage].joined(separator: "\n")
-        
-        return resultMessage
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
     }
     
     func hideScreeElements(yesOrNo: Bool) {
@@ -221,66 +127,12 @@ private extension MovieQuizViewController {
     }
 }
 
-/*
- Mock-данные
- 
- 
- Картинка: The Godfather
- Настоящий рейтинг: 9,2
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Dark Knight
- Настоящий рейтинг: 9
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Kill Bill
- Настоящий рейтинг: 8,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Avengers
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Deadpool
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Green Knight
- Настоящий рейтинг: 6,6
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Old
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: The Ice Age Adventures of Buck Wild
- Настоящий рейтинг: 4,3
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Tesla
- Настоящий рейтинг: 5,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Vivarium
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-*/
+extension MovieQuizViewController {
+    private func settingFontLabel(for label: UILabel, withFont: String, size: CGFloat) {
+        label.font = UIFont(name: withFont, size: size)
+    }
+    
+    private func settingTitleButton(for button: UIButton, withFont: String, size: CGFloat) {
+        button.titleLabel?.font = UIFont(name: withFont, size: size)
+    }
+}

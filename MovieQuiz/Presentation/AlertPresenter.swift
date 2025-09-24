@@ -19,10 +19,12 @@ final  class AlertPresenter {
         viewController.present(alert, animated: true, completion: nil)
     }
     
-    func showAlertForError(viewController: UIViewController, message: String) {
+    func showAlertForError(viewController: UIViewController, message: String, restartGame: @escaping () -> Void) {
         let alert = UIAlertController(title: "Что-то пошло не так(", message: message, preferredStyle: .alert)
 
-        alert.addAction(UIAlertAction(title: "Попробовать ещё раз", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Попробовать ещё раз", style: .default) { _ in
+            restartGame()
+        })
 
         viewController.present(alert, animated: true, completion: nil)
     }
